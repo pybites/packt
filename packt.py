@@ -8,6 +8,7 @@ import tweepy
 from selenium.webdriver.chrome.options import Options
 
 
+CHROME_DRIVER = os.environ['CHROME_DRIVER']
 PACKT_FREE_LEARNING = "https://www.packtpub.com/packt/offers/free-learning"
 HELP_TEXT = 'Packt free book (video) of the day'
 UPDATE_MSG = """Packt Free Learning of the day:
@@ -43,7 +44,8 @@ def get_packt_book():
     options = Options()
     options.add_argument("--headless")
 
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(executable_path=CHROME_DRIVER,
+                              options=options)
     driver.get(PACKT_FREE_LEARNING)
 
     find_class = driver.find_element_by_class_name
