@@ -19,11 +19,14 @@ Expires in {expires} ... grab it now!
 
 {cover}
 """
+
+"""TODO
 CONSUMER_KEY = os.environ['CONSUMER_KEY']
 CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
 ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
 ACCESS_SECRET = os.environ['ACCESS_SECRET']
 SLACK_WEBHOOK_URL = ''
+""
 
 Book = namedtuple('Book', 'title author pub_date cover expires')
 

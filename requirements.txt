@@ -1,4 +1,3 @@
-bs4
 requests
 selenium  # ~/bin/chromedriver
 tweepy
