@@ -20,13 +20,12 @@ Expires in {expires} ... grab it now!
 {cover}
 """
 
-"""TODO
-CONSUMER_KEY = os.environ['CONSUMER_KEY']
-CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
-ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
-ACCESS_SECRET = os.environ['ACCESS_SECRET']
+CONSUMER_KEY = ''  # os.environ['CONSUMER_KEY']
+CONSUMER_SECRET = ''  # os.environ['CONSUMER_SECRET']
+ACCESS_TOKEN = ''  # os.environ['ACCESS_TOKEN']
+ACCESS_SECRET = ''  # os.environ['ACCESS_SECRET']
+
 SLACK_WEBHOOK_URL = ''
-""
 
 Book = namedtuple('Book', 'title author pub_date cover expires')
 
@@ -83,7 +82,7 @@ def post_to_slack(book_post):
     try:
         resp = requests.post(SLACK_WEBHOOK_URL,
                              json={'text': book_post})
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         if resp.status_code == 201:
             print(f'Shared title on Slack')
         else:
