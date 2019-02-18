@@ -1,6 +1,8 @@
 import argparse
 from collections import namedtuple
+import json
 import os
+import re
 
 from selenium import webdriver
 import requests
@@ -14,23 +16,20 @@ CHROME_DRIVER = os.environ['CHROME_DRIVER']
 PACKT_FREE_LEARNING = "https://www.packtpub.com/packt/offers/free-learning"
 HELP_TEXT = 'Packt free book (video) of the day'
 UPDATE_MSG = """Packt Free Learning of the day:
-{title}
-by {author} (published: {pub_date})
+{title} by {author} (published: {pub_date})
+
 {link}
 
 Expires in {expires} ... grab it now!
-
-{cover}
 """
 
-CONSUMER_KEY = ''  # os.environ['CONSUMER_KEY']
-CONSUMER_SECRET = ''  # os.environ['CONSUMER_SECRET']
-ACCESS_TOKEN = ''  # os.environ['ACCESS_TOKEN']
-ACCESS_SECRET = ''  # os.environ['ACCESS_SECRET']
+CONSUMER_KEY = os.environ['CONSUMER_KEY']
+CONSUMER_SECRET = os.environ['CONSUMER_SECRET']
+ACCESS_TOKEN = os.environ['ACCESS_TOKEN']
+ACCESS_SECRET = os.environ['ACCESS_SECRET']
+SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']
 
-SLACK_WEBHOOK_URL = ''
-
-Book = namedtuple('Book', 'title author pub_date cover expires')
+Book = namedtuple('Book', 'title author pub_date expires')
 
 
 def _create_update(book):
@@ -38,8 +37,7 @@ def _create_update(book):
                              author=book.author,
                              pub_date=book.pub_date,
                              link=PACKT_FREE_LEARNING,
-                             expires=book.expires,
-                             cover=book.cover)
+                             expires=book.expires)
 
 
 def get_packt_book():
@@ -57,15 +55,15 @@ def get_packt_book():
     title = find_class('product__title').text
     author = find_class('product__author').text
     pub_date = find_class('product__publication-date').text
-    cover = find_class('product__img').get_attribute("src")
 
-    timer = find_class('countdown__title').text
-    hours = timer.split()[-1].split(':')[0]
-    expires = f'in {hours} hours'
+    timer_span = find_class('countdown__title').text.splitlines()[-1]
+    timer = re.sub(r'.*(\d{2}:\d{2}:\d{2}).*', r'\1', timer_span)
+    hours = timer.split(':')[0]
+    expires = f'in {int(hours)} hours'
 
     driver.quit()
 
-    book = Book(title, author, pub_date, cover, expires)
+    book = Book(title, author, pub_date, expires)
     update = _create_update(book)
     return update
 
@@ -86,16 +84,18 @@ def post_to_twitter(book_post):
 
 
 def post_to_slack(book_post):
-    try:
-        resp = requests.post(SLACK_WEBHOOK_URL,
-                             json={'text': book_post})
-        # import pdb; pdb.set_trace()
-        if resp.status_code == 201:
-            print(f'Shared title on Slack')
-        else:
-            raise
-    except Exception as exc:
-        print(f'Error posting to Slack - exception: {exc}')
+    payload = {'text': book_post}
+    headers = {'Content-Type': 'application/json'}
+    resp = requests.post(SLACK_WEBHOOK_URL,
+                         data=json.dumps(payload),
+                         headers=headers)
+    if resp.status_code == 200:
+        print(f'Shared title on Slack')
+    else:
+        error = ('POST to Slack returned status code '
+                 f'{resp.status_code} and response '
+                 f'text: {resp.text}')
+        raise ValueError(error)
 
 
 if __name__ == '__main__':
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     print(book_update)
 
     if args.slack:
-        post_to_twitter(book_update)
+        post_to_slack(book_update)
 
     if args.twitter:
-        post_to_slack(book_update)
+        post_to_twitter(book_update)
