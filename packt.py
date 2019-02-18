@@ -27,7 +27,7 @@ UPDATE_MSG = """Packt Free Learning of the day:
 
 {link}
 
-Expires in {expires} ... grab it now!
+{expires} ... grab it now!
 """
 
 
@@ -53,8 +53,16 @@ def _get_options():
 
 def _get_expired(timer):
     hh_mm_ss = re.sub(r'.*(\d{2}:\d{2}:\d{2}).*', r'\1', timer)
-    hours = hh_mm_ss.split(':')[0]
-    return f'in {int(hours)} hours'
+    title = 'This title'
+    try:
+        hours = int(hh_mm_ss.split(':')[0])
+    except ValueError:
+        return f'{title} expires today'
+
+    if hours == 0:
+        return f'{title} is about to expire'
+    else:
+        return f'{title} expires in {hours} hours'
 
 
 def get_packt_book():
