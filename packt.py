@@ -8,7 +8,9 @@ import tweepy
 from selenium.webdriver.chrome.options import Options
 
 
+GOOGLE_CHROME_BIN = os.environ['GOOGLE_CHROME_BIN']
 CHROME_DRIVER = os.environ['CHROME_DRIVER']
+
 PACKT_FREE_LEARNING = "https://www.packtpub.com/packt/offers/free-learning"
 HELP_TEXT = 'Packt free book (video) of the day'
 UPDATE_MSG = """Packt Free Learning of the day:
@@ -43,6 +45,9 @@ def _create_update(book):
 def get_packt_book():
     options = Options()
     options.add_argument("--headless")
+    options.binary_location = GOOGLE_CHROME_BIN
+    options.add_argument('--disable-gpu')
+    options.add_argument('--no-sandbox')
 
     driver = webdriver.Chrome(executable_path=CHROME_DRIVER,
                               options=options)
