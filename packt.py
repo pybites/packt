@@ -3,10 +3,12 @@ from collections import namedtuple
 import json
 import os
 import re
+from time import sleep
 
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 import tweepy
 
 
@@ -45,9 +47,9 @@ def _create_update(book):
 def _get_options():
     options = Options()
     options.add_argument("--headless")
-    options.binary_location = GOOGLE_CHROME_BIN
-    options.add_argument('--disable-gpu')
+    # options.binary_location = GOOGLE_CHROME_BIN
     options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     return options
 
 
@@ -71,6 +73,14 @@ def get_packt_book():
     driver.get(PACKT_FREE_LEARNING)
 
     find_class = driver.find_element_by_class_name
+
+    # annoying store switch popup
+    try:
+        sleep(3)
+        find_class('secondary').click()
+        sleep(3)
+    except NoSuchElementException:
+        pass
 
     title = find_class('product__title').text
     author = find_class('product__author').text
