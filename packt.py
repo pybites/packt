@@ -8,7 +8,8 @@ from time import sleep
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import (NoSuchElementException,
+                                        ElementNotInteractableException)
 import tweepy
 
 
@@ -79,7 +80,7 @@ def get_packt_book():
         sleep(3)
         find_class('secondary').click()
         sleep(3)
-    except NoSuchElementException:
+    except (NoSuchElementException, ElementNotInteractableException):
         pass
 
     title = find_class('product__title').text
