@@ -24,7 +24,10 @@ ACCESS_SECRET = os.environ['ACCESS_SECRET']
 # slack
 SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']
 
-PACKT_FREE_LEARNING = "https://www.packtpub.com/packt/offers/free-learning"
+PACKT_HOMEPAGE = "https://www.packtpub.com/eu/"
+# not sure if this works in US, will tweak later
+PACKT_FREE_LEARNING = "https://www.packtpub.com/eu/free-learning"
+FREE_LEARNING_TEXT = "Free Learning"
 UPDATE_MSG = """Packt Free Learning of the day:
 {title} by {author} (published: {pub_date})
 
@@ -69,9 +72,16 @@ def _get_expired(timer):
 
 
 def get_packt_book():
+    # comment options if you want to avoid headless (debug)
     driver = webdriver.Chrome(executable_path=CHROME_DRIVER,
                               options=_get_options())
-    driver.get(PACKT_FREE_LEARNING)
+    # seems free learning redirects to home, so go there first
+    driver.get(PACKT_HOMEPAGE)
+    # need this sleep to avoid another redirect
+    sleep(5)
+
+    # then click free learning link from there
+    driver.find_element_by_link_text(FREE_LEARNING_TEXT).click()
 
     find_class = driver.find_element_by_class_name
 
