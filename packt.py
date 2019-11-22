@@ -29,7 +29,7 @@ PACKT_HOMEPAGE = "https://www.packtpub.com/eu/"
 PACKT_FREE_LEARNING = "https://www.packtpub.com/eu/free-learning"
 FREE_LEARNING_TEXT = "Free Learning"
 UPDATE_MSG = """Packt Free Learning of the day:
-{title} by {author} (published: {pub_date})
+{title} by {author} (published: {pub_date} / # pages: {num_pages})
 
 {link}
 
@@ -37,13 +37,14 @@ UPDATE_MSG = """Packt Free Learning of the day:
 """
 
 
-Book = namedtuple('Book', 'title author pub_date expires')
+Book = namedtuple('Book', 'title author pub_date num_pages expires')
 
 
 def _create_update(book):
     return UPDATE_MSG.format(title=book.title,
                              author=book.author,
                              pub_date=book.pub_date,
+                             num_pages=book.num_pages,
                              link=PACKT_FREE_LEARNING,
                              expires=book.expires)
 
@@ -94,13 +95,19 @@ def get_packt_book():
         pass
 
     title = find_class('product__title').text
-    author = find_class('product__author').text
+
     pub_date = find_class('product__publication-date').text
     timer = find_class('countdown__title').text.splitlines()[-1]
 
+    book_info = find_class(
+        'product__info'
+    ).get_attribute('innerHTML').replace('\n', ' ')
+    author = re.sub(r'.*<p>By (.*?)</p>.*', r'\1', book_info)
+    num_pages = re.sub(r'.*<p>(\d+) pages</p>.*', r'\1', book_info)
+
     driver.quit()
 
-    book = Book(title, author, pub_date, _get_expired(timer))
+    book = Book(title, author, pub_date, num_pages, _get_expired(timer))
     return _create_update(book)
 
 
